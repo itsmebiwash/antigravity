@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 
 interface GestureState {
-    gestureMode: 'NONE' | 'PINCH' | 'PALM' | 'POINT';
+    gestureMode: 'NONE' | 'FIST' | 'TWO_FINGER_SWIPE' | 'TRI_FINGER_PINCH' | 'ONE_TAP';
     pointer: { x: number; y: number; z: number };
-    setGestureMode: (mode: 'NONE' | 'PINCH' | 'PALM' | 'POINT') => void;
+    setGestureMode: (mode: 'NONE' | 'FIST' | 'TWO_FINGER_SWIPE' | 'TRI_FINGER_PINCH' | 'ONE_TAP') => void;
     setPointer: (x: number, y: number, z: number) => void;
 
     // State history for undo/redo
-    history: string[];
-    pushHistory: (stateId: string) => void;
-    popHistory: () => string | undefined;
+    history: any[];
+    pushHistory: (state: any) => void;
+    popHistory: () => any | undefined;
 }
 
 export const useGestureStore = create<GestureState>((set, get) => ({
@@ -19,7 +19,7 @@ export const useGestureStore = create<GestureState>((set, get) => ({
     setPointer: (x, y, z) => set({ pointer: { x, y, z } }),
 
     history: [],
-    pushHistory: (stateId) => set((state) => ({ history: [...state.history, stateId] })),
+    pushHistory: (state) => set((s) => ({ history: [...s.history, state] })),
     popHistory: () => {
         const { history } = get();
         if (history.length === 0) return undefined;
