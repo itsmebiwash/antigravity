@@ -73,14 +73,42 @@ export default function HandTracking() {
                         const hand = results.landmarks[0];
 
                         // Draw skeleton on PIP
-                        canvasCtx.strokeStyle = '#0ff0fc';
-                        canvasCtx.lineWidth = 2;
-                        // A crude draw of hand points for visual feedback
-                        for (let i = 0; i < hand.length; i++) {
+                        canvasCtx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+                        canvasCtx.lineWidth = 1;
+                        
+                        // Draw connecting lines (simplified hand skeleton)
+                        const connections = [
+                            [0,1,2,3,4], // thumb
+                            [0,5,6,7,8], // index
+                            [0,9,10,11,12], // middle
+                            [0,13,14,15,16], // ring
+                            [0,17,18,19,20], // pinky
+                            [5,9,13,17] // palm
+                        ];
+
+                        connections.forEach(conn => {
                             canvasCtx.beginPath();
-                            canvasCtx.arc(hand[i].x * canvasRef.current.width, hand[i].y * canvasRef.current.height, 3, 0, 2 * Math.PI);
-                            canvasCtx.fillStyle = '#8a2be2';
-                            canvasCtx.fill();
+                            canvasCtx.moveTo(hand[conn[0]].x * canvasRef.current!.width, hand[conn[0]].y * canvasRef.current!.height);
+                            for(let i=1; i<conn.length; i++) {
+                                canvasCtx.lineTo(hand[conn[i]].x * canvasRef.current!.width, hand[conn[i]].y * canvasRef.current!.height);
+                            }
+                            canvasCtx.stroke();
+                        });
+
+                        // Draw landmarks as digital nodes
+                        for (let i = 0; i < hand.length; i++) {
+                            const x = hand[i].x * canvasRef.current.width;
+                            const y = hand[i].y * canvasRef.current.height;
+                            
+                            canvasCtx.fillStyle = i % 4 === 0 ? '#6366f1' : '#818cf8';
+                            canvasCtx.fillRect(x - 1.5, y - 1.5, 3, 3);
+                            
+                            if (i === 8 || i === 4) { // Index and Thumb tips get extra glow
+                                canvasCtx.shadowBlur = 10;
+                                canvasCtx.shadowColor = '#6366f1';
+                                canvasCtx.strokeRect(x - 3, y - 3, 6, 6);
+                                canvasCtx.shadowBlur = 0;
+                            }
                         }
 
                         // Core Landmarks
@@ -145,7 +173,10 @@ export default function HandTracking() {
     }, [landmarker, setGestureMode, setPointer]);
 
     return (
-        <div className="absolute bottom-8 right-8 w-48 h-36 rounded-xl overflow-hidden border border-[var(--neon-blue)] shadow-[0_0_15px_rgba(15,240,252,0.5)] z-50 stark-panel pointer-events-none">
+        <div className="fixed bottom-6 right-6 w-[240px] h-[135px] rounded-lg overflow-hidden border border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.4)] z-[100] backdrop-blur-md bg-black/20 pointer-events-none">
+            {/* Scanned Grid Overlay */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(rgba(99,102,241,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            
             <video
                 ref={videoRef}
                 autoPlay
@@ -156,11 +187,26 @@ export default function HandTracking() {
                 ref={canvasRef}
                 width={640}
                 height={480}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover grayscale brightness-125 contrast-125 opacity-80"
             />
-            <div className="absolute bottom-1 left-2 text-[8px] text-[var(--neon-blue)] hud-font opacity-70">
-                CAM_UPLINK_ACTIVE
+            
+            {/* HUD Elements */}
+            <div className="absolute top-2 left-2 flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                <span className="text-[10px] text-indigo-400 font-mono tracking-widest uppercase font-bold">
+                    Neural_Link: Active
+                </span>
             </div>
+
+            <div className="absolute bottom-2 right-2 text-[8px] text-indigo-400/70 font-mono">
+                PIP_UPLINK_01
+            </div>
+
+            {/* Corner Brackets */}
+            <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-indigo-500/50" />
+            <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-indigo-500/50" />
+            <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-indigo-500/50" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-indigo-500/50" />
         </div>
     );
 }

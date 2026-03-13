@@ -6,6 +6,10 @@ interface GestureState {
     setGestureMode: (mode: 'NONE' | 'FIST' | 'TWO_FINGER_SWIPE' | 'TRI_FINGER_PINCH' | 'ONE_TAP') => void;
     setPointer: (x: number, y: number, z: number) => void;
 
+    // Mission lifecycle
+    isMissionStarted: boolean;
+    setIsMissionStarted: (started: boolean) => void;
+
     // State history for undo/redo
     history: any[];
     pushHistory: (state: any) => void;
@@ -17,6 +21,9 @@ export const useGestureStore = create<GestureState>((set, get) => ({
     pointer: { x: 0, y: 0, z: 0 },
     setGestureMode: (mode) => set({ gestureMode: mode }),
     setPointer: (x, y, z) => set({ pointer: { x, y, z } }),
+
+    isMissionStarted: false,
+    setIsMissionStarted: (started) => set({ isMissionStarted: started }),
 
     history: [],
     pushHistory: (state) => set((s) => ({ history: [...s.history, state] })),

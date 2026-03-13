@@ -10,6 +10,7 @@ import CameraController from '@/components/canvas/CameraController';
 import LoadingScreen from '@/components/canvas/LoadingScreen';
 import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
+import VirtualCursor from '@/components/canvas/VirtualCursor';
 
 function GalaxyBackground() {
     const texture = useLoader(THREE.TextureLoader, '/nebula/textures/8k_stars_milky_way.jpg');
@@ -36,6 +37,9 @@ export default function Scene() {
                     <GalaxyBackground />
                     <SolarSystem />
                 </Suspense>
+
+                {/* 3D Virtual Cursor for Hand Interaction */}
+                <VirtualCursor />
 
                 {/* Dynamic Camera Controller logic driven by gestures */}
                 <CameraController />
